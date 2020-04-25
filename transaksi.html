@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/style2.css">
+</head>
+<body>
+    <h1>Transaksi</h1>
+    <hr>
+    <form id="form">
+        <label for="costumer">Nama Costumer<span id="titik1">:</span></label>
+        <input type="text" name="costumer" id="costumer" class="textbox1"><br>
+        <label for="contact">Nomor Hp/Telp<span id="titik2">:</span></label>
+        <input type="number" name="contact" id="contact" class="textbox1" ><br>
+        <label for="barang">Nama Barang:</label>
+        <input type="text" name="barang" id="barang" class="textbox2" >
+        <label for="harga">Harga:</label>
+        <input type="number" name="harga" id="harga" class="textbox2" onkeyup="subtot()">
+        <label for="jumlah">Jumlah:</label>
+        <input type="number" name="jumlah" id="jumlah" class="textbox2" onkeyup="subtot()">
+        <label for="hasil">Total <span id="titik3">:</span></label>
+        <input type="text" name="hasil" id="hasil">
+        <input type="submit" value="Save" id="savebtn">
+        
+        <input type="button" value="Add" class="tablebtn" onclick="addbarang()"><br>
+        <input type="button" value="Edit" class="tablebtn" onclick="editbarang()"><br>
+        <input type="button" value="Remove" class="tablebtn" onclick="removebarang()"><br>
+    </form>
+    <table border="1" id="table">
+        <thead>
+            <th>Nama Barang</th>
+            <th>Harga</th>
+        </thead>
+        <tr>
+            <td>Keyboard Desktop</td>
+            <td>80000</td>
+        </tr>
+        <tr>
+            <td>Mouse</td>
+            <td>50000</td>
+        </tr>
+        <tr>
+            <td>Printer</td>
+            <td>800000</td>
+        </tr>
+    </table>
+    <script>
+        var rIndex,
+            table = document.getElementById("table");
+        function checkinputkosong(){
+            var kosong = false,
+                barang = document.getElementById("barang").value,
+                harga = document.getElementById("harga").value;
+            if (barang === ""){
+                alert("Tidak Boleh Kosong");
+                kosong = true;
+            }
+            else if (harga === ""){
+                alert("Tidak Boleh Kosong");
+                kosong = true;
+            }
+            return kosong;
+        }
+
+        function addbarang(){
+            if (!checkinputkosong()){
+                var newRow = table.insertRow(table.length),
+                    cell1 = newRow.insertCell(0),
+                    cell2 = newRow.insertCell(1),
+                    barang = document.getElementById("barang").value,
+                    harga = document.getElementById("harga").value;
+                cell1.innerHTML = barang;
+                cell2.innerHTML = harga;
+                selectedRowToInput();
+            }
+        }
+
+        function selectedRowToInput(){
+            for (var i = 1; i <table.rows.length; i++){
+                table.rows[i].onclick = function (){
+                    rIndex = this.rowIndex;
+                    document.getElementById("barang").value = this.cells[0].innerHTML;
+                    document.getElementById("harga").value = this.cells[1].innerHTML;
+                };
+            }
+        }
+        selectedRowToInput();
+
+        function editbarang(){
+            var barang = document.getElementById("barang").value,
+                harga = document.getElementById("harga").value;
+            if (!checkinputkosong()){
+                table.rows[rIndex].cells[0].innerHTML = barang;
+                table.rows[rIndex].cells[1].innerHTML =harga;
+            }
+        }
+
+        function removebarang (){
+            table.deleteRow(rIndex);
+            document.getElementById("barang").value = "";
+            document.getElementById("harga").value = "";
+        }
+
+        function subtot(){
+            var a = document.getElementById("harga").value;
+            var b = document.getElementById("jumlah").value;
+            var result = parseInt(a)*parseInt(b);
+            if(!isNaN(result)){
+                document.getElementById("hasil").value = result;
+            }
+        }
+
+        const electron = require("electron");
+            const {
+                ipcRenderer
+            } = electron;
+
+            const form = document.getElementById("form");
+            const elements = {};
+
+            form.addEventListener("submit", event => {
+                event.preventDefault();
+
+                for (let i = 0; i < form.elements.length; i++) {
+                    if (form.elements[i].type !== "submit")
+                        elements[form.elements[i].name] = form.elements[i].value;
+                }
+
+                ipcRenderer.send("penjualan:transaksi", elements);
+            });
+    </script>
+</body>
+</html>
